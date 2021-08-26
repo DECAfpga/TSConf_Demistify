@@ -1,4 +1,4 @@
-# [TSConf](http://forum.tslabs.info/viewforum.php?f=20&sid=137db6b31f9fb533b908742c2b18284e) for MiSTer Platform
+# [TSConf](http://forum.tslabs.info/viewforum.php?f=20&sid=137db6b31f9fb533b908742c2b18284e) Demistified
 
 This is the port of TSConf (an improvement to the [ZX-Evolution](https://www.facebook.com/zxatmevolution/) ZX spectrum clone) to MiSTer.
 
