@@ -157,8 +157,8 @@ COMPONENT  TSConf_DM
 		VGA_B		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
 		AUDIO_L  : out std_logic;
 		AUDIO_R  : out std_logic;
-		DAC_L           : OUT SIGNED(9 DOWNTO 0);
-      DAC_R           : OUT SIGNED(9 DOWNTO 0)
+		DAC_L           : OUT SIGNED(15 DOWNTO 0);
+      DAC_R           : OUT SIGNED(15 DOWNTO 0)
 	);
 END COMPONENT;
 
@@ -193,8 +193,8 @@ end component;
 
 
 -- DAC
-signal dac_l: signed(9 downto 0);
-signal dac_r: signed(9 downto 0);
+signal dac_l: signed(15 downto 0);
+signal dac_r: signed(15 downto 0);
         
 signal dac_l_s: signed(15 downto 0);
 signal dac_r_s: signed(15 downto 0);
@@ -282,8 +282,8 @@ i2s_transmitter_inst : i2s_transmitter
 		i2s_d_o => i2sD
 	);
 
-dac_l_s <= ('0' & dac_l & "00000");
-dac_r_s <= ('0' & dac_r & "00000");
+dac_l_s <= '0' & dac_l(15 downto 1);
+dac_r_s <= '0' & dac_r(15 downto 1);
 
 
 guest: COMPONENT  TSConf_DM

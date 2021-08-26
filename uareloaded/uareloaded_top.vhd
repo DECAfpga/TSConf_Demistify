@@ -118,8 +118,8 @@ architecture RTL of uareloaded_top is
 	signal joyd : std_logic_vector(7 downto 0);
 	
 -- DAC
-   signal dac_l: signed(9 downto 0);
-   signal dac_r: signed(9 downto 0);
+   signal dac_l: signed(15 downto 0);
+   signal dac_r: signed(15 downto 0);
 	
 	signal dac_l_s: signed(15 downto 0);
    signal dac_r_s: signed(15 downto 0);
@@ -160,8 +160,8 @@ COMPONENT  TSConf_DM
 		VGA_B		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
 		AUDIO_L  : out std_logic;
 		AUDIO_R  : out std_logic;
-		DAC_L		: OUT SIGNED(9 DOWNTO 0);
-		DAC_R		: OUT SIGNED(9 DOWNTO 0)
+		DAC_L		: OUT SIGNED(15 DOWNTO 0);
+		DAC_R		: OUT SIGNED(15 DOWNTO 0)
 		
 	);
 END COMPONENT;
@@ -232,12 +232,12 @@ port map(
 	  dac_SCLK  => SCLK,
 	  dac_SDIN  => SDIN,
 	  dac_LRCK  => LRCLK,
-	  L_data    => std_logic_vector (dac_l_s),
-	  R_data    => std_logic_vector (dac_r_s)
+	  L_data    => dac_l,
+	  R_data    => dac_r
 );
 
-dac_l_s <= (dac_l & dac_l(9 downto 4));
-dac_r_s <= (dac_r & dac_r(9 downto 4));
+--dac_l_s <= '0' & dac_l(15 downto 1);
+--dac_r_s <= '0' & dac_r(15 downto 1);
 
 guest: COMPONENT  TSConf_DM
 	PORT map

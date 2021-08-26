@@ -44,8 +44,8 @@ module TSConf_DM
         output        VGA_VS,
         output        AUDIO_L,
         output        AUDIO_R, 
-		  output [9:0]  DAC_L, 
-		  output [9:0]  DAC_R, 
+		  output [15:0]  DAC_L, 
+		  output [15:0]  DAC_R, 
         input         TAPE_IN,
         input         UART_RX,
         output        UART_TX,
@@ -291,22 +291,22 @@ tsconf tsconf
 wire [15:0] audio_l_s;
 wire [15:0] audio_r_s;
 
-dac #(16) dac_l (
-   .clk_i        (clk_sys),
-   .res_n_i      (1      ),
+dac_dsm2v #(16) dac_l (
+   .clock_i      (clk_sys),
+   .reset_i      (0      ),
    .dac_i        (audio_l_s),
    .dac_o        (AUDIO_L)
 );
 
-dac #(16) dac_r (
-   .clk_i        (clk_sys),
-   .res_n_i      (1      ),
+dac_dsm2v #(16) dac_r (
+   .clock_i      (clk_sys),
+   .reset_i      (0      ),
    .dac_i        (audio_r_s),
    .dac_o        (AUDIO_R)
 );
 
-assign DAC_L=audio_l_s[15:6];
-assign DAC_R=audio_r_s[15:6];
+assign DAC_L=audio_l_s;
+assign DAC_R=audio_r_s;
 
 
 wire CLK_VIDEO;

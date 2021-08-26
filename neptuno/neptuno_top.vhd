@@ -120,8 +120,8 @@ architecture RTL of neptuno_top is
 	signal joyc : std_logic_vector(7 downto 0);
 	signal joyd : std_logic_vector(7 downto 0);
 
-   signal  DAC_L : std_logic_vector(9 downto 0);
-	signal  DAC_R : std_logic_vector(9 downto 0);
+   signal  DAC_L : signed(15 downto 0);
+	signal  DAC_R : signed(15 downto 0);
 	
 COMPONENT  TSConf_DM
 	PORT
@@ -158,8 +158,8 @@ COMPONENT  TSConf_DM
 		AUDIO_L  : out std_logic;
 		AUDIO_R  : out std_logic;
 		LED      : out std_logic;
-		DAC_L    : out std_logic_vector(9 downto 0);
-	   DAC_R    : out std_logic_vector(9 downto 0)
+		DAC_L    : out signed(15 downto 0);
+	   DAC_R    : out signed(15 downto 0)
 
 	);
 END COMPONENT;
@@ -170,12 +170,10 @@ Port (
 		dac_LRCK : out STD_LOGIC;
 		dac_SCLK : out STD_LOGIC;
 		dac_SDIN : out STD_LOGIC;
-		L_data : 	in std_logic_vector(15 downto 0);  	-- LEFT data (15-bit signed)
-		R_data : 	in std_logic_vector(15 downto 0)  	-- RIGHT data (15-bit signed) 
+		L_data : 	in signed(15 downto 0);  	-- LEFT data (15-bit signed)
+		R_data : 	in signed(15 downto 0)  	-- RIGHT data (15-bit signed) 
 );
 end component;	
-	signal audio_l_s			: std_logic_vector(15 downto 0);
-	signal audio_r_s			: std_logic_vector(15 downto 0);
 
 
 component joydecoder is
@@ -267,12 +265,12 @@ port map(
 	dac_LRCK  => I2S_LRCLK,
 	dac_SCLK  => I2S_BCLK,
 	dac_SDIN  => I2S_DATA,
-	L_data    => std_logic_vector(audio_l_s),
-	R_data    => std_logic_vector(audio_r_s)
+	L_data    => dac_l,
+	R_data    => dac_r
 );		
 
-audio_l_s <= '0' & DAC_L & "00000";
-audio_r_s <= '0' & DAC_R & "00000";
+--dac_l_s <= '0' & dac_l(15 downto 1);
+--dac_r_s <= '0' & dac_r(15 downto 1);
 
 	-- JOYSTICKS
 joy: joydecoder
