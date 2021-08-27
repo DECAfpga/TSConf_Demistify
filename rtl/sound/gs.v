@@ -107,7 +107,8 @@ T80pa cpu
 (
 	.RESET_n(~RESET),
 	.CLK(CLK),
-	.CEN_p(CE & ~MEM_WAIT),
+	//.CEN_p(CE & ~MEM_WAIT),
+	.CEN_p(CE),
 	.INT_n(int_n),
 	.M1_n(cpu_m1_n),
 	.MREQ_n(cpu_mreq_n),

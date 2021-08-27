@@ -20,6 +20,14 @@ entity neptuno_top is
 		DRAM_WE_N		:	 OUT STD_LOGIC;
 		DRAM_CAS_N		:	 OUT STD_LOGIC;
 		DRAM_RAS_N		:	 OUT STD_LOGIC;
+		-- SRAM
+		SRAM_A         : OUT STD_LOGIC_VECTOR (19 downto 0);
+		SRAM_Q         : INOUT STD_LOGIC_VECTOR (15 downto 0);
+		SRAM_WE        : OUT STD_LOGIC;
+		SRAM_OE        : OUT STD_LOGIC;
+		SRAM_UB        : OUT STD_LOGIC;
+		SRAM_LB        : OUT STD_LOGIC;
+		-- VGA
 		VGA_HS		:	 OUT STD_LOGIC;
 		VGA_VS		:	 OUT STD_LOGIC;
 		VGA_R		:	 OUT STD_LOGIC_VECTOR(4 DOWNTO 0);
@@ -123,6 +131,10 @@ architecture RTL of neptuno_top is
    signal  DAC_L : signed(15 downto 0);
 	signal  DAC_R : signed(15 downto 0);
 	
+	signal sram_address  : std_logic_vector (20 downto 0);
+	signal sram_data_in  : std_logic_vector (7 downto 0);
+	signal sram_data_out : std_logic_vector (7 downto 0);
+	
 COMPONENT  TSConf_DM
 	PORT
 	(
@@ -139,6 +151,15 @@ COMPONENT  TSConf_DM
 		SDRAM_BA		:	 OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 		SDRAM_CLK		:	 OUT STD_LOGIC;
 		SDRAM_CKE		:	 OUT STD_LOGIC;
+		-- SRAM
+		SRAM_A         : OUT STD_LOGIC_VECTOR (20 downto 0);
+		SRAM_DI        : OUT STD_LOGIC_VECTOR (7 downto 0);
+		SRAM_DO        : IN STD_LOGIC_VECTOR (7 downto 0);
+		SRAM_WE        : OUT STD_LOGIC;
+		SRAM_OE        : OUT STD_LOGIC;
+		--SRAM_UB        : OUT STD_LOGIC;
+		--SRAM_LB        : OUT STD_LOGIC;
+		
 		-- UART
 		UART_TX    :   OUT STD_LOGIC;
 		UART_RX    :   IN STD_LOGIC;
@@ -311,6 +332,15 @@ guest: COMPONENT  TSConf_DM
 		SDRAM_CLK => DRAM_CLK,
 		SDRAM_CKE => DRAM_CKE,
 		
+		-- SRAM
+		SRAM_A    => sram_address,
+		SRAM_DI   => sram_data_in,
+		SRAM_DO   => sram_data_out,
+		SRAM_WE  => SRAM_WE,
+		SRAM_OE  => SRAM_OE,
+		--SRAM_UB  => SRAM_UB,
+		--SRAM_LB  => SRAM_LB,
+		
 		UART_TX  => open,
 		UART_RX  => AUDIO_INPUT,
 		
@@ -335,6 +365,16 @@ guest: COMPONENT  TSConf_DM
 		DAC_L   => DAC_L,
 		DAC_R   => DAC_R
 );
+
+SRAM_A  <= sram_address (19 downto 0);
+SRAM_UB <= not sram_address (20);
+SRAM_LB <= sram_address (20);
+SRAM_Q (7 downto 0) <= (others => 'Z') when (sram_address(20) = '1') else sram_data_in; 
+SRAM_Q (15 downto 8) <= (others => 'Z') when (sram_address(20) = '0') else sram_data_in; 
+sram_data_out <= SRAM_Q (7 downto 0)  when (sram_address(20) = '0') else SRAM_Q(15 downto 8); 
+
+--SRAM_OE <= '0';
+
 
 -- Pass internal signals to external SPI interface
 sd_clk <= spi_clk_int;

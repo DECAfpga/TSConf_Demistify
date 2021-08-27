@@ -70,7 +70,14 @@ module TSConf_DM
         output        SDRAM_nCS,
         output  [1:0] SDRAM_BA,
         output        SDRAM_CLK,
-        output        SDRAM_CKE
+        output        SDRAM_CKE,
+		  
+		  //SRAM
+		  output [20:0] SRAM_A,
+		  output [7:0] SRAM_DI,
+		  input  [7:0] SRAM_DO,
+		  output        SRAM_WE,
+		  output        SRAM_OE
 );
 
 
@@ -82,7 +89,7 @@ module TSConf_DM
 `include "build_id.v" 
 localparam CONF_STR = {
 	"TSConf;;",
-	"S,VHD,Mount virtual SD;",
+	"S0,VHD,Mount virtual SD;",
 	"O12,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%;",
 	"O34,Stereo mix,None,25%,50%,100%;",
 	"OST,General Sound,512KB,1MB,2MB;",
@@ -225,6 +232,27 @@ wire ce_vid;
 wire reset;
 assign LED=~(ioctl_download | sd_act);
 
+wire [20:0] gs_mem_addr;
+wire  [7:0] gs_mem_dout;
+wire  [7:0] gs_mem_din;
+wire        gs_mem_rd;
+wire        gs_mem_wr;
+wire        gs_mem_ready=1'b1 ;//gs_mem_wr | gs_mem_rd;
+reg   [7:0] gs_mem_mask;
+
+always_comb begin
+	gs_mem_mask = 0;
+	case(status[29:28])
+		0: if(gs_mem_addr[20:19]) gs_mem_mask = 8'hFF;
+		1: if(gs_mem_addr[20])    gs_mem_mask = 8'hFF;
+	 2,3:                        gs_mem_mask = 0;
+	endcase
+end
+
+
+assign SRAM_WE      =  ~gs_mem_wr;
+assign SRAM_OE      =  1'b0;//~gs_mem_rd;
+
 tsconf tsconf
 (
 	.clk(clk_sys),
@@ -256,12 +284,16 @@ tsconf tsconf
 	.SD_CLK(sdclk),
 	.SD_CS_N(sdss),
 
-//	.GS_ADDR(gs_mem_addr),
-//	.GS_DI(gs_mem_din),
-//	.GS_DO(gs_mem_dout | gs_mem_mask),
-//	.GS_RD(gs_mem_rd),
-//	.GS_WR(gs_mem_wr),
-//	.GS_WAIT(~gs_mem_ready), 	
+	.GS_ADDR(SRAM_A),
+	.GS_DI(SRAM_DI),
+	.GS_DO(SRAM_DO | gs_mem_mask),
+	.GS_RD(gs_mem_rd),
+	.GS_WR(gs_mem_wr),
+	.GS_WAIT(0), 	
+
+
+	
+
 	.SOUND_L(audio_l_s),
 	.SOUND_R(audio_r_s),
 

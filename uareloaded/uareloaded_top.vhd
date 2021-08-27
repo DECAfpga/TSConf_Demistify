@@ -48,6 +48,11 @@ entity uareloaded_top is
 		JOYSTICK1                   : in std_logic_vector (5 downto 0);
 		JOYSTICK2                   : in std_logic_vector (5 downto 0);
 		JOY_SELECT                  : out std_logic :='1';
+	   -- SRAM
+      SRAM_A         : OUT STD_LOGIC_VECTOR (20 downto 0);
+      SRAM_Q         : INOUT STD_LOGIC_VECTOR (7 downto 0);
+      SRAM_WE        : OUT STD_LOGIC;
+ 
 		-- SD Card
 		SD_CS                       : out   std_logic := '1';
 		SD_SCK                      : out   std_logic := '0';
@@ -124,24 +129,27 @@ architecture RTL of uareloaded_top is
 	signal dac_l_s: signed(15 downto 0);
    signal dac_r_s: signed(15 downto 0);
 	
-	
+	signal sram_data_in  : std_logic_vector (7 downto 0);
+   signal sram_data_out : std_logic_vector (7 downto 0);
+   signal sram_we_s     : std_logic;
 
 COMPONENT  TSConf_DM
 	PORT
 	(
-		CLOCK_27 :	IN STD_LOGIC;
+		CLOCK_27       : IN STD_LOGIC;
 		--RESET_N :   IN std_logic;
-		SDRAM_DQ		:	 INOUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-		SDRAM_A		:	 OUT STD_LOGIC_VECTOR(12 DOWNTO 0);
-		SDRAM_DQML		:	 OUT STD_LOGIC;
-		SDRAM_DQMH		:	 OUT STD_LOGIC;
-		SDRAM_nWE		:	 OUT STD_LOGIC;
-		SDRAM_nCAS		:	 OUT STD_LOGIC;
-		SDRAM_nRAS		:	 OUT STD_LOGIC;
-		SDRAM_nCS		:	 OUT STD_LOGIC;
-		SDRAM_BA		:	 OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-		SDRAM_CLK		:	 OUT STD_LOGIC;
-		SDRAM_CKE		:	 OUT STD_LOGIC;
+		LED            : OUT STD_LOGIC; 
+		SDRAM_DQ		   : INOUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		SDRAM_A		   : OUT STD_LOGIC_VECTOR(12 DOWNTO 0);
+		SDRAM_DQML		: OUT STD_LOGIC;
+		SDRAM_DQMH		: OUT STD_LOGIC;
+		SDRAM_nWE		: OUT STD_LOGIC;
+		SDRAM_nCAS		: OUT STD_LOGIC;
+		SDRAM_nRAS		: OUT STD_LOGIC;
+		SDRAM_nCS		: OUT STD_LOGIC;
+		SDRAM_BA		   : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+		SDRAM_CLK		: OUT STD_LOGIC;
+		SDRAM_CKE		: OUT STD_LOGIC;
 		-- UART
 		UART_TX    :   OUT STD_LOGIC;
 		UART_RX    :   IN STD_LOGIC;
@@ -153,7 +161,13 @@ COMPONENT  TSConf_DM
 		SPI_SS3		:	 IN STD_LOGIC;
 --		SPI_SS4		:	 IN STD_LOGIC;
 		CONF_DATA0		:	 IN STD_LOGIC;
-		VGA_HS		:	 OUT STD_LOGIC;
+		-- SRAM
+		SRAM_A         : OUT STD_LOGIC_VECTOR (20 downto 0);
+		SRAM_DI        : OUT STD_LOGIC_VECTOR (7 downto 0);
+		SRAM_DO        : IN STD_LOGIC_VECTOR (7 downto 0);
+		SRAM_WE        : OUT STD_LOGIC;
+
+      VGA_HS		:	 OUT STD_LOGIC;
 		VGA_VS		:	 OUT STD_LOGIC;
 		VGA_R		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
 		VGA_G		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
@@ -167,14 +181,6 @@ COMPONENT  TSConf_DM
 END COMPONENT;
 
 begin
-
-
--- SPI
-
---sd_cs_n_o<=sd_cs;
---sd_mosi_o<=sd_mosi;
---sd_miso<=sd_miso_i;
---sd_sclk_o<=sd_clk;
 
 
 
@@ -200,7 +206,6 @@ joyc<=(others=>'1');
 joyd<=(others=>'1');
 
 STM_RST <= '0';
-LED <= AUDIO_IN; --not ps2_keyboard_clk;
 
 
 pll_vga: entity work.pll_vga
@@ -236,13 +241,13 @@ port map(
 	  R_data    => dac_r
 );
 
---dac_l_s <= '0' & dac_l(15 downto 1);
---dac_r_s <= '0' & dac_r(15 downto 1);
+
 
 guest: COMPONENT  TSConf_DM
 	PORT map
 	(
 		CLOCK_27 => CLOCK_50,
+		LED      => LED,
 		--RESET_N => reset_n,
 		-- clocks
 		SDRAM_DQ => DRAM_DQ,
@@ -269,8 +274,15 @@ guest: COMPONENT  TSConf_DM
 --		SPI_SS4	=> spi_ss4,
 		
 		CONF_DATA0 => conf_data0,
+		
+		-- SRAM
+		SRAM_A    => SRAM_A,
+		SRAM_DI   => sram_data_in,
+		SRAM_DO   => sram_data_out,
+		SRAM_WE   => sram_we_s,
 
-		VGA_HS => vga_hsync,
+
+	   VGA_HS => vga_hsync,
 		VGA_VS => vga_vsync,
 		VGA_R => vga_red(7 downto 2),
 		VGA_G => vga_green(7 downto 2),
@@ -280,6 +292,12 @@ guest: COMPONENT  TSConf_DM
 		DAC_L   => dac_l,
 		DAC_R   => dac_r
 );
+
+
+SRAM_Q <=sram_data_in   when sram_we_s = '0' else (others=>'Z'); 
+sram_data_out <= SRAM_Q when sram_we_s = '1' else (others=>'Z');
+SRAM_WE <= sram_we_s;
+
 
 -- Pass internal signals to external SPI interface
 sd_sck <= spi_clk_int;

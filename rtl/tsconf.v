@@ -89,12 +89,12 @@ module tsconf
 	output        SD_CS_N,
 
 	// General Sound
-//	output [20:0] GS_ADDR,
-//	output  [7:0] GS_DI,
-//	input   [7:0] GS_DO,
-//	output        GS_RD,
-//	output        GS_WR,
-//	input         GS_WAIT,
+	output [20:0] GS_ADDR,
+	output  [7:0] GS_DI,
+	input   [7:0] GS_DO,
+	output        GS_RD,
+	output        GS_WR,
+	input         GS_WAIT,
 
 	// Audio
 	output [15:0] SOUND_L,
@@ -824,32 +824,32 @@ turbosound SE12
 //// General Sound
 wire [14:0] gs_l;
 wire [14:0] gs_r;
-//wire [7:0]  gs_do_bus;
-//wire        gs_sel = ~cpu_iorq_n & cpu_m1_n & (cpu_a_bus[7:4] == 'hB && cpu_a_bus[2:0] == 'h3);
-//
-//gs #("rtl/sound/gs105b.mif") U15
-//(
-//	.RESET(reset),
-//	.CLK(clk),
-//	.CE(ce),
-//	
-//	.A(cpu_a_bus[3]),
-//	.DI(cpu_do_bus),
-//	.DO(gs_do_bus),
-//	.CS_n(cpu_iorq_n | ~gs_sel),
-//	.WR_n(cpu_wr_n),
-//	.RD_n(cpu_rd_n),
-//	
-//	.MEM_ADDR(GS_ADDR),
-//	.MEM_DI(GS_DI),
-//	.MEM_DO(GS_DO),
-//	.MEM_RD(GS_RD),
-//	.MEM_WR(GS_WR),
-//	.MEM_WAIT(GS_WAIT),
-//	
-//	.OUTL(gs_l),
-//	.OUTR(gs_r)
-//);
+wire [7:0]  gs_do_bus;
+wire        gs_sel = ~cpu_iorq_n & cpu_m1_n & (cpu_a_bus[7:4] == 'hB && cpu_a_bus[2:0] == 'h3);
+
+gs #("../rtl/sound/gs105b.mif") U15
+(
+	.RESET(reset),
+	.CLK(clk),
+	.CE(ce),
+	
+	.A(cpu_a_bus[3]),
+	.DI(cpu_do_bus),
+	.DO(gs_do_bus),
+	.CS_n(cpu_iorq_n | ~gs_sel),
+	.WR_n(cpu_wr_n),
+	.RD_n(cpu_rd_n),
+	
+	.MEM_ADDR(GS_ADDR),
+	.MEM_DI(GS_DI),
+	.MEM_DO(GS_DO),
+	.MEM_RD(GS_RD),
+	.MEM_WR(GS_WR),
+	.MEM_WAIT(GS_WAIT),
+	
+	.OUTL(gs_l),
+	.OUTR(gs_r)
+);
 
 
 // SAA1099
@@ -902,7 +902,7 @@ assign cpu_di_bus =
 		(csrom && ~cpu_mreq_n && ~cpu_rd_n) 						?	bios_do_bus			:	// BIOS
 		(~cpu_mreq_n && ~cpu_rd_n)										?	sdr_do_bus			:	// SDRAM
 		(intack)																?	im2vect 				:
-		//(gs_sel && ~cpu_rd_n)											?	gs_do_bus			:	// General Sound
+		(gs_sel && ~cpu_rd_n)											?	gs_do_bus			:	// General Sound
 		(ts_enable && ~cpu_rd_n)										?	ts_do					:	// TurboSound
 		(cpu_a_bus == 16'h0001 && ~cpu_iorq_n && ~cpu_rd_n)	?	key_scancode		:
 		(ena_ports)															?	dout_ports			:
