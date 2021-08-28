@@ -99,7 +99,9 @@ module tsconf
 	// Audio
 	output [15:0] SOUND_L,
 	output [15:0] SOUND_R,
-
+	
+	// TAPE IN
+   input         TAPE_READ,
 	// Misc. I/O
 	input         COLD_RESET,
 	input         WARM_RESET,
@@ -433,7 +435,7 @@ zports TS05
 	.vdos(vdos),
 	.vdos_on(vdos_on),
 	.vdos_off(vdos_off),
-	.tape_read(1),
+	.tape_read(TAPE_READ),
 	.keys_in(kb_do_bus),		// keys (port FE)
 	.mus_in(mouse_do),		// mouse (xxDF)
 	.kj_in(joystick),
@@ -880,8 +882,8 @@ saa1099 U16
 	.out_r(saa_out_r)
 );
 
-wire [11:0] audio_l = ts_l + {gs_l[14], gs_l[14:4]} + {2'b00, covox_a, 2'b00} + {2'b00, covox_b, 2'b00} + {1'b0, saa_out_l, 3'b000} + {3'b000, port_xxfe_reg[4], 8'b00000000};
-wire [11:0] audio_r = ts_r + {gs_r[14], gs_r[14:4]} + {2'b00, covox_c, 2'b00} + {2'b00, covox_d, 2'b00} + {1'b0, saa_out_r, 3'b000} + {3'b000, port_xxfe_reg[4], 8'b00000000};
+wire [11:0] audio_l = ts_l + {gs_l[14], gs_l[14:4]} + {2'b00, covox_a, 2'b00} + {2'b00, covox_b, 2'b00} + {1'b0, saa_out_l, 3'b000} + {3'b000, port_xxfe_reg[4], 8'b00000000} + {5'b00000, TAPE_READ, 6'b000000};
+wire [11:0] audio_r = ts_r + {gs_r[14], gs_r[14:4]} + {2'b00, covox_c, 2'b00} + {2'b00, covox_d, 2'b00} + {1'b0, saa_out_r, 3'b000} + {3'b000, port_xxfe_reg[4], 8'b00000000} + {5'b00000, TAPE_READ, 6'b000000};
 
 compressor compressor
 (

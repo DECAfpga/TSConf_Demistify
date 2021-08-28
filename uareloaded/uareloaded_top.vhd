@@ -112,7 +112,8 @@ architecture RTL of uareloaded_top is
 -- RS232 serial
 	signal rs232_rxd : std_logic;
 	signal rs232_txd : std_logic;
-
+-- LED
+   signal drive_led : std_logic;
 
 	
 -- IO
@@ -206,6 +207,7 @@ joyc<=(others=>'1');
 joyd<=(others=>'1');
 
 STM_RST <= '0';
+LED <= not drive_led;
 
 
 pll_vga: entity work.pll_vga
@@ -247,7 +249,7 @@ guest: COMPONENT  TSConf_DM
 	PORT map
 	(
 		CLOCK_27 => CLOCK_50,
-		LED      => LED,
+		LED      => drive_led,
 		--RESET_N => reset_n,
 		-- clocks
 		SDRAM_DQ => DRAM_DQ,
