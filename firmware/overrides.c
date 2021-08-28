@@ -1,6 +1,6 @@
 #include "diskimg.h"
 
-const char *bootvhd_name="TSConf  vhd";
+const char *bootvhd_name="TSCONF  VHD";
 
 char *autoboot()
 {

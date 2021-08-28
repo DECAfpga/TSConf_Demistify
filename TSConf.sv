@@ -16,25 +16,6 @@
 //============================================================================
 
 
-// TODO
-//  - Complete Keyboard Mapping
-//  - Make Memory size select from OSD
-//  - Select PAL/NTSC
-//  - OSD Load Keyboard Map 
-//  - Tape Load Graphical wave
-//  - Tape Counter (bytes)
-
-// Done
-//  - Rewind on CAS load or Reset
-//  - LED_Disk on Tape Load
-
-//Core : 
-//Z80 - 3,5555Mhz
-//AY - z80/2 = 1,777 Mhz
-//Mess :
-//Z80 - 3,579545
-//AY - 1,789772
-
 
 
 module TSConf_DM
@@ -283,6 +264,8 @@ tsconf tsconf
 	.SD_SI(sdmosi),
 	.SD_CLK(sdclk),
 	.SD_CS_N(sdss),
+	
+	.TAPE_READ (UART_RX),
 
 	.GS_ADDR(SRAM_A),
 	.GS_DI(SRAM_DI),

@@ -22,6 +22,7 @@ entity deca_top is
 		DRAM_WE_N		:	 OUT STD_LOGIC;
 		DRAM_CAS_N		:	 OUT STD_LOGIC;
 		DRAM_RAS_N		:	 OUT STD_LOGIC;
+
 		VGA_HS		:	 OUT STD_LOGIC;
 		VGA_VS		:	 OUT STD_LOGIC;
 		VGA_R		:	 OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -139,7 +140,14 @@ COMPONENT  TSConf_DM
 		SDRAM_BA		:	 OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 		SDRAM_CLK		:	 OUT STD_LOGIC;
 		SDRAM_CKE		:	 OUT STD_LOGIC;
-		-- UART
+--    SRAM
+   	SRAM_A         : OUT STD_LOGIC_VECTOR (20 downto 0);
+		SRAM_DI        : OUT STD_LOGIC_VECTOR (7 downto 0);
+		SRAM_DO        : IN STD_LOGIC_VECTOR (7 downto 0);
+		SRAM_WE        : OUT STD_LOGIC;
+		SRAM_OE        : OUT STD_LOGIC;
+
+--    UART
 		UART_TX    :   OUT STD_LOGIC;
 		UART_RX    :   IN STD_LOGIC;
 		SPI_DO		:	 OUT STD_LOGIC;
@@ -198,6 +206,9 @@ signal dac_r: signed(15 downto 0);
         
 signal dac_l_s: signed(15 downto 0);
 signal dac_r_s: signed(15 downto 0);
+
+
+signal sram_data_out: std_logic_vector(7 downto 0) := (others => 'Z');
 
 begin
 
@@ -306,6 +317,13 @@ guest: COMPONENT  TSConf_DM
 		
 		UART_TX  => UART_TXD,
 		UART_RX  => UART_RXD,
+		
+--    SRAM
+		SRAM_A    => open,
+		SRAM_DI   => open,
+		SRAM_DO   => sram_data_out,
+		SRAM_WE   => open,
+		SRAM_OE   => open,
 		
 --		SPI_SD_DI => sd_miso,
 		SPI_DO => spi_fromguest,
