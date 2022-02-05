@@ -52,7 +52,9 @@ entity uareloaded_top is
       SRAM_A         : OUT STD_LOGIC_VECTOR (20 downto 0);
       SRAM_Q         : INOUT STD_LOGIC_VECTOR (7 downto 0);
       SRAM_WE        : OUT STD_LOGIC;
- 
+ 	   -- I2C 
+	   I2C_SCL			: INOUT std_logic;
+	   I2C_SDA			: INOUT std_logic;
 		-- SD Card
 		SD_CS                       : out   std_logic := '1';
 		SD_SCK                      : out   std_logic := '0';
@@ -71,14 +73,10 @@ architecture RTL of uareloaded_top is
 	signal reset_n : std_logic;
 
 
+--I2C
+   signal i2c_scl_s : std_logic;
+	signal i2c_sda_s : std_logic; 
 
--- SPI signals
-
---	signal sd_clk : std_logic;
---	signal sd_cs : std_logic;
---	signal sd_mosi : std_logic;
---	signal sd_miso : std_logic;
-	
 -- internal SPI signals
 	
 	signal spi_toguest : std_logic;
@@ -112,10 +110,10 @@ architecture RTL of uareloaded_top is
 -- RS232 serial
 	signal rs232_rxd : std_logic;
 	signal rs232_txd : std_logic;
+
 -- LED
    signal drive_led : std_logic;
 
-	
 -- IO
 
 	signal joya : std_logic_vector(7 downto 0);
@@ -162,12 +160,15 @@ COMPONENT  TSConf_DM
 		SPI_SS3		:	 IN STD_LOGIC;
 --		SPI_SS4		:	 IN STD_LOGIC;
 		CONF_DATA0		:	 IN STD_LOGIC;
-		-- SRAM
+-- SRAM
 		SRAM_A         : OUT STD_LOGIC_VECTOR (20 downto 0);
 		SRAM_DI        : OUT STD_LOGIC_VECTOR (7 downto 0);
 		SRAM_DO        : IN STD_LOGIC_VECTOR (7 downto 0);
 		SRAM_WE        : OUT STD_LOGIC;
-
+-- I2C 
+	   I2C_SCL			: INOUT std_logic;
+	   I2C_SDA			: INOUT std_logic;
+-- VGA
       VGA_HS		:	 OUT STD_LOGIC;
 		VGA_VS		:	 OUT STD_LOGIC;
 		VGA_R		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
@@ -196,7 +197,11 @@ ps2_keyboard_dat_in <=ps2_keyboard_dat;
 ps2_keyboard_dat <= '0' when ps2_keyboard_dat_out='0' else 'Z';
 ps2_keyboard_clk_in<=ps2_keyboard_clk;
 ps2_keyboard_clk <= '0' when ps2_keyboard_clk_out='0' else 'Z';
-	
+
+
+
+-- Joystick
+
 JOY_SELECT<= '1';
 
 	
@@ -283,6 +288,9 @@ guest: COMPONENT  TSConf_DM
 		SRAM_DO   => sram_data_out,
 		SRAM_WE   => sram_we_s,
 
+ 	   -- I2C 
+	   I2C_SCL	 => I2C_SCL,
+	   I2C_SDA	 => I2C_SDA,
 
 	   VGA_HS => vga_hsync,
 		VGA_VS => vga_vsync,
@@ -299,6 +307,7 @@ guest: COMPONENT  TSConf_DM
 SRAM_Q <=sram_data_in   when sram_we_s = '0' else (others=>'Z'); 
 sram_data_out <= SRAM_Q when sram_we_s = '1' else (others=>'Z');
 SRAM_WE <= sram_we_s;
+
 
 
 -- Pass internal signals to external SPI interface

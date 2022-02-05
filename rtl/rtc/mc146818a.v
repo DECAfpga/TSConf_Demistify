@@ -11,7 +11,6 @@ module mc146818a
    input        ENA,
    input        CS,
 
-   input [64:0] RTC,
    input [31:0] CMOSCfg,
 
    input  [7:0] KEYSCANCODE,
@@ -77,23 +76,23 @@ always @(*) begin
 end
 
 always @(posedge CLK) begin
-	reg flg;
-
-	flg <= RTC[64];
-	if (flg != RTC[64]) begin
-		seconds_reg <= RTC[7:0];
-		minutes_reg <= RTC[15:8];
-		hours_reg   <= RTC[23:16];
-		days_reg    <= RTC[31:24];
-		month_reg   <= RTC[39:32];
-		year_reg    <= RTC[47:40];
-		weeks_reg   <= RTC[55:48] + 1'b1;
-		b_reg       <= 8'b00000010;
-	end 
+//	reg flg;
+//
+//	flg <= RTC[64];
+//	if (flg != RTC[64]) begin
+//		seconds_reg <= RTC[7:0];
+//		minutes_reg <= RTC[15:8];
+//		hours_reg   <= RTC[23:16];
+//		days_reg    <= RTC[31:24];
+//		month_reg   <= RTC[39:32];
+//		year_reg    <= RTC[47:40];
+//		weeks_reg   <= RTC[55:48] + 1'b1;
+//		b_reg       <= 8'b00000010;
+//	end 
 
 	if (RESET) b_reg <= 8'b00000010;
 	else if (WR & CS) begin
-		/*
+		
 		case (A[7:0])
 			0 : seconds_reg       <= DI;
 			1 : seconds_alarm_reg <= DI;
@@ -116,7 +115,6 @@ always @(posedge CLK) begin
 				end
 			end
 		endcase
-		*/
 	end
 
 	if (RESET) begin

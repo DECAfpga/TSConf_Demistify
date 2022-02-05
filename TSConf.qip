@@ -9,7 +9,8 @@ set_global_assignment -name VERILOG_FILE ../rtl/common/zmem.v
 set_global_assignment -name VERILOG_FILE ../rtl/common/zmaps.v
 set_global_assignment -name VERILOG_FILE ../rtl/common/zint.v
 set_global_assignment -name VERILOG_FILE ../rtl/common/zclock.v
-set_global_assignment -name VERILOG_FILE ../rtl/rtc/mc146818a.v
+set_global_assignment -name VHDL_FILE ../rtl/rtc/mc146818a.vhd
+set_global_assignment -name QIP_FILE ../rtl/rtc/CMOS.qip
 set_global_assignment -name VHDL_FILE ../rtl/sound/soundrive.vhd
 set_global_assignment -name QIP_FILE ../rtl/sound/jt12/jt03.qip
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/sound/ym2149.sv
@@ -30,5 +31,6 @@ set_global_assignment -name VHDL_FILE ../rtl/keyboard.vhd
 set_global_assignment -name VERILOG_FILE ../rtl/kempston_mouse.v
 set_global_assignment -name VERILOG_FILE ../rtl/spi.v
 set_global_assignment -name VERILOG_FILE ../rtl/clock.v
+set_global_assignment -name VERILOG_FILE ../rtl/i2c/i2c.v
 set_global_assignment -name VERILOG_FILE ../rtl/tsconf.v
 set_global_assignment -name SYSTEMVERILOG_FILE ../TSConf.sv

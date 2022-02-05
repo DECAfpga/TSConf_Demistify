@@ -109,7 +109,9 @@ module tsconf
 	input  [64:0] RTC,
 	input  [31:0] CMOSCfg,
 	input         OUT0,
-
+   //
+	inout         I2C_SCL,
+	inout         I2C_SDA,
 	// PS/2 Keyboard
 	input  [10:0] PS2_KEY,
 	input  [24:0] PS2_MOUSE,
@@ -743,11 +745,31 @@ kempston_mouse KM
 	.dout(mouse_do)
 );
 
+
+// I2C
+wire[7:0] i2c_do_bus;
+wire i2c_wr;
+
+
+i2c U12
+(
+  .I_RESET(reset),
+  .I_CLK(clk_28mhz),
+  .I_ENA(ena_0_4375mhz),
+  .I_ADDR(cpu_a_bus[4]),
+  .I_DATA(cpu_do_bus),
+  .O_DATA(i2c_do_bus),
+  .I_WR(i2c_wr),
+  .IO_I2C_SCL(I2C_SCL),
+  .IO_I2C_SDA(I2C_SDA)
+);
+
 // MC146818A,RTC
 wire [7:0] wait_addr;
 wire       wait_start_gluclock;
 wire [7:0] mc146818a_do_bus;
-
+wire       mc146818a_wr;
+    
 reg ena_0_4375mhz;
 always @(posedge clk_28mhz) begin
 	reg [5:0] div;
@@ -762,8 +784,6 @@ mc146818a SE9
 	.ENA(ena_0_4375mhz),
 	.CS(1),
 	.KEYSCANCODE(key_scancode),
-	.RTC(RTC),
-	.CMOSCfg(CMOSCfg),
 	.WR(wait_start_gluclock & ~cpu_wr_n),
 	.A(wait_addr),
 	.DI(cpu_do_bus),
@@ -906,16 +926,53 @@ assign cpu_di_bus =
 		(intack)																?	im2vect 				:
 		(gs_sel && ~cpu_rd_n)											?	gs_do_bus			:	// General Sound
 		(ts_enable && ~cpu_rd_n)										?	ts_do					:	// TurboSound
+		(~cpu_iorq_n && ~cpu_rd_n && port_bff7 
+		  && port_eff7_reg[7])                                ?  mc146818a_do_bus  :
 		(cpu_a_bus == 16'h0001 && ~cpu_iorq_n && ~cpu_rd_n)	?	key_scancode		:
+		(cpu_a_bus[7:5] ==3'b100 && cpu_a_bus[3:0]==4'b1100
+	  	       && ~cpu_iorq_n && ~cpu_rd_n)                   ?  i2c_do_bus        :
 		(ena_ports)															?	dout_ports			:
 																					8'b11111111;
 // TURBO
 assign turbo = sysconf[1:0];
 
 reg [7:0] port_xxfe_reg;
+reg [7:0] port_eff7_reg;
+
+//reg [7:0] port_c7ef_reg; //ZIFI_COMMAND and ZIFI_ERROR
+//reg [7:0] port_bfef_reg; //ZIFI DATA
+//reg [7:0] port_c0ef_reg; //ZIFI_INPUT_FIFO
+//reg [7:0] port_c1ef_reg; //ZIFI_OUTPUT FIFO
+
+
 always @(posedge clk_28mhz) begin
-	if (reset) port_xxfe_reg <= 0;
-	else if (~cpu_iorq_n && ~cpu_wr_n && cpu_a_bus[7:0] == 8'hFE) port_xxfe_reg <= cpu_do_bus;
+	if (reset) begin 
+		port_xxfe_reg <= 8'b0;
+		port_eff7_reg <= 8'b0;
+
+//		port_c7ef_reg <= 8'b0;
+//		port_bfef_reg <= 8'b0;
+//		port_c1ef_reg <= 8'b0;
+//		port_c1ef_reg <= 8'b0;
+	end
+	else begin
+		if (~cpu_iorq_n && ~cpu_wr_n && cpu_a_bus[7:0] == 8'hFE) port_xxfe_reg <= cpu_do_bus;
+		if (~cpu_iorq_n && ~cpu_wr_n && cpu_a_bus == 16'hEFF7) port_eff7_reg <= cpu_do_bus;
+
+//		if (~cpu_iorq_n && ~cpu_wr_n && cpu_a_bus == 16'hC7EF) port_c7ef_reg <= cpu_do_bus;
+//		if (~cpu_iorq_n && ~cpu_wr_n && cpu_a_bus == 16'hBFEF) port_bfef_reg <= cpu_do_bus;
+//		if (~cpu_iorq_n && ~cpu_wr_n && cpu_a_bus == 16'hC0EF) port_c0ef_reg <= cpu_do_bus;
+//		if (~cpu_iorq_n && ~cpu_wr_n && cpu_a_bus == 16'hC1EF) port_c1ef_reg <= cpu_do_bus;
+
+	end	
 end
+
+// I2C
+assign i2c_wr =(cpu_a_bus[7:5] == 3'b100 && cpu_a_bus[3:0] == 4'b1100 && ~cpu_wr_n && ~cpu_iorq_n);
+
+// RTC
+wire port_bff7;
+assign mc146818a_wr = (port_bff7 && ~cpu_wr_n);
+assign port_bff7 = (~cpu_iorq_n && cpu_a_bus == 16'hBFF7 && cpu_m1_n && port_eff7_reg[7]);
 
 endmodule

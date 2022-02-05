@@ -53,6 +53,10 @@ module TSConf_DM
         output        SDRAM_CLK,
         output        SDRAM_CKE,
 		  
+		  //I2C 
+		  inout         I2C_SDA,
+		  inout         I2C_SCL,
+		  
 		  //SRAM
 		  output [20:0] SRAM_A,
 		  output [7:0] SRAM_DI,
@@ -166,7 +170,7 @@ mist_io #(.STRLEN($size(CONF_STR)>>3),.PS2DIV(100)) mist_io
    .SPI_SS2   (SPI_SS2),
    .SPI_DO    (SPI_DO),
    .SPI_DI    (SPI_DI),
-
+	
 	.clk_sys(clk_sys),
 	.conf_str(CONF_STR),
 
@@ -265,6 +269,9 @@ tsconf tsconf
 	.SD_CLK(sdclk),
 	.SD_CS_N(sdss),
 	
+	.I2C_SCL  (I2C_SCL),
+	.I2C_SDA  (I2C_SDA),
+
 	.TAPE_READ (UART_RX),
 
 	.GS_ADDR(SRAM_A),
@@ -283,7 +290,6 @@ tsconf tsconf
 	.COLD_RESET(status[0] | reset_img),
 	.WARM_RESET(0),
 	.RESET_OUT(reset),
-	.RTC(RTC),
 	.OUT0(status[30]),
 
 	.CMOSCfg(CMOSCfg),

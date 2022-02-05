@@ -36,25 +36,28 @@ entity neptuno_top is
 		-- AUDIO
 		SIGMA_R                     : OUT STD_LOGIC;
 		SIGMA_L                     : OUT STD_LOGIC;
-				-- I2S audio		
+-- I2S audio		
 		I2S_BCLK				: out   std_logic								:= '0';
 		I2S_LRCLK			: out   std_logic								:= '0';
 		I2S_DATA				: out   std_logic								:= '0';		
-      
-		-- JOYSTICK 
+		 -- I2C 
+	   I2C_SCL                      : INOUT std_logic;
+	   I2C_SDA                      : INOUT std_logic;
+
+-- JOYSTICK 
 		JOY_CLK				: out   std_logic;
 		JOY_LOAD 			: out   std_logic;
 		JOY_DATA 			: in    std_logic;
 		joyP7_o			   : out   std_logic								:= '1';
 
-		-- PS2
+-- PS2
 		PS2_KEYBOARD_CLK            :    INOUT STD_LOGIC;
 		PS2_KEYBOARD_DAT            :    INOUT STD_LOGIC;
 		PS2_MOUSE_CLK               :    INOUT STD_LOGIC;
 		PS2_MOUSE_DAT               :    INOUT STD_LOGIC;
-		-- UART
+-- UART
 		AUDIO_INPUT                 : IN STD_LOGIC;
-		--STM32
+--STM32
       stm_rx_o            : out std_logic     := 'Z'; -- stm RX pin, so, is OUT on the slave
       stm_tx_i            : in  std_logic     := 'Z'; -- stm TX pin, so, is IN on the slave
       stm_rst_o           : out std_logic     := 'Z'; -- '0' to hold the microcontroller reset line, to free the SD card
@@ -159,8 +162,10 @@ COMPONENT  TSConf_DM
 		SRAM_OE        : OUT STD_LOGIC;
 		--SRAM_UB        : OUT STD_LOGIC;
 		--SRAM_LB        : OUT STD_LOGIC;
-		
-		-- UART
+--    I2C 
+	   I2C_SCL                      : INOUT std_logic;
+	   I2C_SDA                      : INOUT std_logic;
+-- 	UART
 		UART_TX    :   OUT STD_LOGIC;
 		UART_RX    :   IN STD_LOGIC;
 		SPI_DO		:	 OUT STD_LOGIC;
@@ -362,6 +367,8 @@ guest: COMPONENT  TSConf_DM
 		AUDIO_L => sigma_l,
 		AUDIO_R => sigma_r,
 		LED     => LED,
+		I2C_SCL => I2C_SCL,
+		I2C_SDA => I2C_SDA,
 		DAC_L   => DAC_L,
 		DAC_R   => DAC_R
 );
